@@ -7,18 +7,17 @@
 #
 
 RETVAL=0
-LOG_DIR="<%= @log_dir %>"
+LOG_DIR="/var/log"
 LOG_FILE="${LOG_DIR}/god.log"
-RUN_DIR="<%= @run_dir %>"
-GLOBAL_CONFIG="<%= @global_config %>"
+RUN_DIR="/var/run"
+GLOBAL_CONFIG="/etc/god/god.conf"
 PID_FILE="${RUN_DIR}/god.pid"
-PROG_BINARY="<%= @binary_path -%>"
+PROG_BINARY="/home/admin/.rbenv/shims/god"
 
 case "$1" in
     start)
       echo "Starting god..."
-      $PROG_BINARY -P $PID_FILE -l $LOG_FILE
-      $PROG_BINARY load $GLOBAL_CONFIG
+      $PROG_BINARY -c $GLOBAL_CONFIG -P $PID_FILE -l $LOG_FILE
       RETVAL=$?
       echo "Done."
       ;;
@@ -31,14 +30,23 @@ case "$1" in
     stop)
       echo "Stopping god..."
       kill `cat $PID_FILE`
+      for file in ${RUN_DIR}/god/*
+      do
+	        kill `cat $file`
+	        echo "process $file killed"
+      done
       RETVAL=$?
       echo "Done."
       ;;
     restart)
       echo "Restarting god..."
       kill `cat $PID_FILE`
-      $PROG_BINARY -P $PID_FILE -l $LOG_FILE
-      $PROG_BINARY load $GLOBAL_CONFIG
+      for file in ${RUN_DIR}/god/*
+      do
+	        kill `cat $file`
+	        echo "process $file killed"
+      done
+      $PROG_BINARY -c $GLOBAL_CONFIG -P $PID_FILE -l $LOG_FILE
       RETVAL=$?
       echo "Done."
       ;;
