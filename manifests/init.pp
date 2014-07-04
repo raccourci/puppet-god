@@ -32,6 +32,7 @@ class god(
     ensure   => file,
     mode     => 0755,
     content  => template('god/god.init.erb'),
+    require  => File[$global_config],
     notify   => Service[$service]
   }
 
